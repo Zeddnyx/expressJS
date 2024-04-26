@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { DELETE, NOT_FOUND, OK,ERROR } from "../../utils/message";
+import { DELETE, NOT_FOUND, OK,ERROR } from "../../utils/response";
 
 const router = Router();
 const OBJ = {
@@ -11,7 +11,7 @@ const OBJ = {
 };
 const ARR = [OBJ];
 
-router.get("/blog", (req, res) => {
+router.get("/blog", (_, res) => {
   res.send(OK(ARR));
 });
 

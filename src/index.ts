@@ -5,6 +5,7 @@ import compression from "compression";
 import cors from "cors";
 import projects from "./routes/projects"
 import blog  from "./routes/blog"
+import task  from "./routes/task"
 
 const app = express();
 app.use(
@@ -28,6 +29,7 @@ app.use((req, _, next) => {
 
 app.use("/api", projects);
 app.use("/api", blog);
+app.use("/api", task);
 
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);

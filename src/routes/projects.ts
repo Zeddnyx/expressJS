@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { DELETE, NOT_FOUND, OK,ERROR } from "../../utils/message";
+import { DELETE, NOT_FOUND, OK,ERROR } from "../../utils/response";
 
 const router = Router();
 const ARR = [
