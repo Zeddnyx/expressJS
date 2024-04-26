@@ -15,12 +15,12 @@ app.use(
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: true}));
 
 const server = http.createServer(app);
 const PORT = 8080;
 
-app.use((req, res, next) => {
+app.use((req, _, next) => {
   console.log("---------------------");
   console.log(`req url: ${req.url}\nreq method: ${req.method}\n`);
   next();
@@ -28,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use("/api", projects);
 app.use("/api", blog);
+
 server.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });

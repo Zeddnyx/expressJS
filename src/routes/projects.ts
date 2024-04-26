@@ -31,7 +31,7 @@ router.get("/projects/:id", (req, res) => {
 router.delete("/projects/:id", (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === Number(id));
-  result ? res.send(OK(DELETE)) : res.send(NOT_FOUND());
+  result ? res.send(DELETE) : res.send(NOT_FOUND());
 });
 
 router.put("/projects/:id", (req, res) => {
