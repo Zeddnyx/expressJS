@@ -11,11 +11,12 @@ import cors from "cors";
 import passport from "passport";
 import flash from "express-flash";
 import session from "express-session";
+import { exec } from "child_process";
 
-import projects from "./routes/projects"
-import blog  from "./routes/blog"
-import task  from "./routes/task"
-import auth  from "./routes/auth"
+import projects from "./routes/projects";
+import blog from "./routes/blog";
+import task from "./routes/task";
+import auth from "./routes/auth";
 
 const app = express();
 app.use(
@@ -24,24 +25,32 @@ app.use(
   }),
 );
 app.use(flash());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-}))
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
 const PORT = 8080;
 
 app.use((req, _, next) => {
-  console.log("---------------------");
-  console.log(`req url: ${req.url}\nreq method: ${req.method}\n`);
+  exec("clear", (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(stdout);
+    console.log(`req url: ${req.url}\nreq method: ${req.method}\n`);
+  });
   next();
 });
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { DELETE, NOT_FOUND, OK,ERROR } from "../../utils/response";
+import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
 
 const router = Router();
 const OBJ = {
@@ -12,19 +12,19 @@ const OBJ = {
 const ARR = [OBJ];
 
 router.get("/blog", (_, res) => {
-  res.send(OK(ARR));
+  OK(res, ARR);
 });
 
 router.get("/blog/:id", (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === Number(id));
-  result ? res.send(OK(result)) : res.send(NOT_FOUND());
+  result ? OK(res, result) : NOT_FOUND(res);
 });
 
 router.post("/blog", (req, res) => {
   ARR.push(req.body);
-  const CODE = 200
-  res.statusCode == CODE ?res.send(OK(req.body,"Succes add data")) : res.send(ERROR());
+  const CODE = 200;
+  res.statusCode == CODE ? OK(res, req.body, "Succes add data") : ERROR(res);
 });
 
 router.put("/blog/:id", (req, res) => {
@@ -32,7 +32,7 @@ router.put("/blog/:id", (req, res) => {
   const result = ARR.find((obj) => obj.id === Number(id));
   result.title = req.body.title;
   result.content = req.body.content;
-  result ? res.send(OK(result)) : res.send(NOT_FOUND());
+  result ? OK(res, result) : NOT_FOUND(res);
 });
 
 router.delete("/blog/:id", (req, res) => {
@@ -42,7 +42,7 @@ router.delete("/blog/:id", (req, res) => {
     ARR.splice(ARR.indexOf(result), 1);
     res.send(DELETE);
   } else {
-    res.send(NOT_FOUND());
+    NOT_FOUND(res);
   }
 });
 
