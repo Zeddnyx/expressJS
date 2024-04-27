@@ -1,5 +1,4 @@
 ## TODO
-- CRUD Task
 - auto generate id
 - login
 - register
