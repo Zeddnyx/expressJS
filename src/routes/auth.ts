@@ -20,7 +20,7 @@ let REFRESH_TOKEN: any = [];
 
 router.post("/login", async (req, res) => {
   const user = USERS.find((user: any) => user.email === req.body.email);
-  if (!user) return NOT_FOUND(res, "User not found");
+  if (!user) return NOT_FOUND(res, "User");
 
   try {
     if (await bcrypt.compare(req.body.password, user.password)) {
@@ -70,7 +70,7 @@ router.post("/register", async (req, res) => {
 router.post("/refresh", (req, res) => { // ERROR issue from this route 
   const refreshToken = req.body.token;
   if (refreshToken == null)
-    return NOT_FOUND(res, "Refresh token not found", 401);
+    return NOT_FOUND(res, "Refresh token", 401);
   if (!REFRESH_TOKEN.includes(refreshToken))
     return ERROR(res, "Refresh token not valid", 403);
   jwt.verify(refreshToken, config.REFRESH_KEY, (err: any, user: any) => {

@@ -7,16 +7,10 @@ export const ERROR = (res: any, msg?: string, code?: number) =>
 
 export const NOT_FOUND = (res: any, msg?: string, code?: number) =>
   res.status(code ? code : 404).send({
-    message: msg ? msg : "Not Found",
+    message: `${msg}  not Found`,
     success: false,
     status: code ? code : 404,
   });
-
-export const BAD_REQUEST = (msg?: string) => ({
-  message: msg ? msg : "Bad Request",
-  success: false,
-  status: 400,
-});
 
 export const DELETE = {
   message: "Success delete item",

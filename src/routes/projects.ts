@@ -62,7 +62,7 @@ router.put("/projects/:id", authenticate, (req, res) => {
       result.image = req.body.image;
       OK(res, result, "Succes update data");
     } else {
-      NOT_FOUND(res, `Not found`);
+      NOT_FOUND(res, `Project`);
     }
   } catch (err) {
     ERROR(res);

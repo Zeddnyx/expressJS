@@ -52,7 +52,7 @@ router.put("/task/:id", (req, res) => {
       result.task = req.body.task;
       OK(res, result, "Succes update data");
     } else {
-      NOT_FOUND(res, `Task with id ${id} not found`);
+      NOT_FOUND(res, `Task`);
     }
   } catch (err) {
     console.log(err);

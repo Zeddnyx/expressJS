@@ -48,7 +48,7 @@ router.put("/blog/:id", authenticate, (req, res) => {
       result.content = req.body.content;
       OK(res, result, "Succes update data");
     } else {
-      NOT_FOUND(res, `Not found`);
+      NOT_FOUND(res, `Blog`);
     }
   } catch (err) {
     console.log(err);
