@@ -1,11 +1,12 @@
 import { Router } from "express";
+import { v4 as uuidv4 } from "uuid"; 
 
 import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
 import validationColumn from "../../utils/validationColumn";
 
 const router = Router();
 const OBJ = {
-  id: Date.now().toString(),
+  id: uuidv4(),
   task: "task",
   column: "backlog", // "backlog" | "todo" | "inProgress" | "completed";
   date: new Date().toLocaleDateString(),
@@ -28,7 +29,7 @@ router.post("/task", (req, res) => {
   try {
     validationColumn(column, res);
     const payload = {
-      id: new Date().getTime().toString(),
+      id: uuidv4(),
       ...req.body,
       date: new Date().toLocaleDateString(),
     };

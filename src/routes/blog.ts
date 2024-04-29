@@ -1,10 +1,12 @@
 import { Router } from "express";
+import { v4 as uuidv4 } from "uuid";
 
 import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
+import authenticate from "../../utils/authenticate";
 
 const router = Router();
 const OBJ = {
-  id: Date.now().toString(),
+  id: uuidv4(),
   title: "zedd",
   content:
     "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit",
@@ -22,9 +24,9 @@ router.get("/blog/:id", (req, res) => {
   result ? OK(res, result) : NOT_FOUND(res);
 });
 
-router.post("/blog", (req, res) => {
+router.post("/blog", authenticate, (req, res) => {
   const payload = {
-    id: new Date().getTime().toString(),
+    id: uuidv4(),
     ...req.body,
     date: new Date().toLocaleDateString(),
   };
@@ -36,7 +38,7 @@ router.post("/blog", (req, res) => {
   }
 });
 
-router.put("/blog/:id", (req, res) => {
+router.put("/blog/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
 
@@ -54,7 +56,7 @@ router.put("/blog/:id", (req, res) => {
   }
 });
 
-router.delete("/blog/:id", (req, res) => {
+router.delete("/blog/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   if (result) {

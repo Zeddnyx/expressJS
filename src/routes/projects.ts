@@ -1,11 +1,13 @@
 import { Router } from "express";
+import { v4 as uuidv4 } from "uuid";
 
 import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
+import authenticate from "../../utils/authenticate";
 
 const router = Router();
 const ARR = [
   {
-    id: Date.now().toString(),
+    id: uuidv4(),
     title: "zedd",
     content:
       "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit",
@@ -20,9 +22,9 @@ router.get("/projects", (req, res) => {
   OK(res, ARR);
 });
 
-router.post("/projects", (req, res) => {
+router.post("/projects", authenticate, (req, res) => {
   const payload = {
-    id: new Date().getTime().toString(),
+    id: uuidv4(),
     ...req.body,
     date: new Date().toLocaleDateString(),
   };
@@ -40,13 +42,13 @@ router.get("/projects/:id", (req, res) => {
   result ? OK(res, result) : NOT_FOUND(res);
 });
 
-router.delete("/projects/:id", (req, res) => {
+router.delete("/projects/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   result ? res.send(DELETE) : NOT_FOUND(res);
 });
 
-router.put("/projects/:id", (req, res) => {
+router.put("/projects/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
 

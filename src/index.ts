@@ -1,8 +1,3 @@
-if (process.env.NODE_ENV !== "production") {
-  const dotenv = require("dotenv");
-  dotenv.config();
-}
-
 import express from "express";
 import http from "http";
 import cookieParser from "cookie-parser";
@@ -11,12 +6,19 @@ import cors from "cors";
 import passport from "passport";
 import flash from "express-flash";
 import session from "express-session";
+import jwt from "jsonwebtoken";
 import { exec } from "child_process";
 
 import projects from "./routes/projects";
 import blog from "./routes/blog";
 import task from "./routes/task";
 import auth from "./routes/auth";
+import { config } from "../config/";
+
+if (config.NODE_ENV !== "production") {
+  const dotenv = require("dotenv");
+  dotenv.config();
+}
 
 const app = express();
 app.use(
@@ -27,7 +29,7 @@ app.use(
 app.use(flash());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    secret: config.KEY,
     resave: false,
     saveUninitialized: false,
   }),
@@ -43,7 +45,7 @@ const server = http.createServer(app);
 const PORT = 8080;
 
 app.use((req, _, next) => {
-  exec("clear", (err, stdout, stderr) => {
+  exec("clear", (err, stdout) => {
     if (err) {
       console.error(err);
       return;
