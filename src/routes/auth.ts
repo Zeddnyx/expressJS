@@ -67,23 +67,46 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/refresh", (req, res) => { // ERROR issue from this route 
+router.post("/forgot-password", (req, res) => {
+  const { email } = req.body;
+  const user = USERS.find((user: any) => user.email === email);
+  if (!user) return NOT_FOUND(res, "Email");
+  // TODO: send email
+  OK(res, {}, "Check your email");
+});
+
+router.post("/reset-password/:token", async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  const user = USERS.find((user: any) => user.email === req.body.email);
+  if (!user) return NOT_FOUND(res, "Email");
+
+
+  try {
+    const passwordEncrypted = await bcrypt.hash(password, 10);
+    user.password = passwordEncrypted;
+    OK(res, {}, "Password reset success");
+  } catch (err) {
+    ERROR(res, err?.message, 400);
+  }
+});
+
+router.post("/refresh", (req, res) => {
   const refreshToken = req.body.token;
-  if (refreshToken == null)
-    return NOT_FOUND(res, "Refresh token", 401);
+  if (refreshToken == null) return NOT_FOUND(res, "Refresh token", 401);
   if (!REFRESH_TOKEN.includes(refreshToken))
     return ERROR(res, "Refresh token not valid", 403);
   jwt.verify(refreshToken, config.REFRESH_KEY, (err: any, user: any) => {
     if (err) return ERROR(res, err?.message, 403);
-    const token = generateToken({email: user.email});
+    const token = generateToken({ email: user.email });
     OK(res, { token });
   });
 });
 
 router.delete("/logout", (req, res) => {
-  const { refreshToken } = req.body;
+  const { token } = req.body;
   REFRESH_TOKEN = REFRESH_TOKEN.filter(
-    (token: string) => token !== refreshToken,
+    (tokenOriginal: string) => tokenOriginal !== token,
   );
   OK(res, {}, "Logout success");
 });

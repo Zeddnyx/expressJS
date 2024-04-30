@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid"; 
+import { v4 as uuidv4 } from "uuid";
 
-import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
+import { PAGINATION, NOT_FOUND, OK, ERROR } from "../../utils/response";
 import validationColumn from "../../utils/validationColumn";
 
 const router = Router();
@@ -14,13 +14,21 @@ const OBJ = {
 const ARR = [OBJ];
 
 router.get("/task", (req, res) => {
-  OK(res, ARR);
+  try {
+    OK(res, PAGINATION(req, ARR));
+  } catch (err) {
+    ERROR(res, err?.message, 500);
+  }
 });
 
 router.get("/task/:id", (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id == id);
-  result ? OK(res, result) : NOT_FOUND(res);
+  try {
+    result ? OK(res, result) : NOT_FOUND(res);
+  } catch (err) {
+    ERROR(res, err?.message, 500);
+  }
 });
 
 router.post("/task", (req, res) => {
@@ -63,11 +71,11 @@ router.put("/task/:id", (req, res) => {
 router.delete("/task/:id", (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id == id);
-  if (result) {
+  try {
     ARR.splice(ARR.indexOf(result), 1);
-    res.send(DELETE);
-  } else {
-    NOT_FOUND(res);
+    result ? OK(res, {}, "Succes delete data", 200) : NOT_FOUND(res, `Task`);
+  } catch (err) {
+    ERROR(res, err?.message, err?.code);
   }
 });
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 
-import { DELETE, NOT_FOUND, OK, ERROR } from "../../utils/response";
+import { NOT_FOUND, OK, ERROR, PAGINATION } from "../../utils/response";
 import authenticate from "../../utils/authenticate";
 
 const router = Router();
@@ -14,14 +14,22 @@ const OBJ = {
 };
 const ARR = [OBJ];
 
-router.get("/blog", (_, res) => {
-  OK(res, ARR);
+router.get("/blog", (req, res) => {
+  try {
+    OK(res, PAGINATION(req, ARR));
+  } catch (err) {
+    ERROR(res, err?.message, 500);
+  }
 });
 
 router.get("/blog/:id", (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
-  result ? OK(res, result) : NOT_FOUND(res);
+  try {
+    result ? OK(res, result) : NOT_FOUND(res, `Blog`);
+  } catch (err) {
+    ERROR(res, err?.message, err?.code);
+  }
 });
 
 router.post("/blog", authenticate, (req, res) => {
@@ -60,10 +68,14 @@ router.delete("/blog/:id", authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   if (result) {
-    ARR.splice(ARR.indexOf(result), 1);
-    res.send(DELETE);
+    try {
+      ARR.splice(ARR.indexOf(result), 1);
+      OK(res, {}, "Succes delete data", 200);
+    } catch (err) {
+      ERROR(res, err?.message, err?.code);
+    }
   } else {
-    NOT_FOUND(res);
+    NOT_FOUND(res, `Blog`);
   }
 });
 

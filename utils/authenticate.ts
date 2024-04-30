@@ -15,5 +15,5 @@ export default function authenticate(req: any, res: any, next: any) {
 }
 
 export const generateToken = (user: any) => {
-  return jwt.sign({ ...user }, config.KEY, { expiresIn: "35s" });
+  return jwt.sign({ ...user }, config.KEY, { expiresIn: "1d" });
 }
