@@ -4,9 +4,9 @@ import passport from "passport";
 import jwt from "jsonwebtoken";
 import { v4 as id } from "uuid";
 
-import { NOT_FOUND, OK, ERROR } from "../../utils/response";
+import { NOT_FOUND, OK, ERROR } from "../utils/response";
 import { config } from "../../config";
-import { generateToken } from "../../utils/authenticate";
+import { apiKey, generateToken } from "../utils/middleware";
 import passportConfig from "../../passport-config";
 
 const router = Router();
@@ -18,13 +18,14 @@ passportConfig(
 let USERS: any = [];
 let REFRESH_TOKEN: any = [];
 
-router.post("/login", async (req, res) => {
-  const user = USERS.find((user: any) => user.email === req.body.email);
+router.post("/login", apiKey, async (req, res) => {
+  const { email, rememberMe } = req.body;
+  const user = USERS.find((user: any) => user.email === email);
   if (!user) return NOT_FOUND(res, "User");
 
   try {
     if (await bcrypt.compare(req.body.password, user.password)) {
-      const token = generateToken(req.body);
+      const token = generateToken(req.body, rememberMe ? "7d" : "1d");
       const refreshToken = jwt.sign(user, config.REFRESH_KEY);
 
       const USER_LOGIN = {
@@ -43,7 +44,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", apiKey, async (req, res) => {
   try {
     const { name, email } = req.body;
     const passwordEncrypted = await bcrypt.hash(req.body.password, 10);
@@ -67,27 +68,38 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/forgot-password", (req, res) => {
+router.post("/forgot-password", apiKey, (req, res) => {
   const { email } = req.body;
   const user = USERS.find((user: any) => user.email === email);
-  if (!user) return NOT_FOUND(res, "Email");
-  // TODO: send email
-  OK(res, {}, "Check your email");
+  if (!user) {
+    return NOT_FOUND(res, "Email");
+  }
+
+  const token = jwt.sign({ email: user.email }, config.KEY, {
+    expiresIn: "5m",
+  });
+
+  try {
+    OK(res, { token }, "Check your email");
+  } catch (err) {
+    ERROR(res, err?.message, err?.code);
+  }
 });
 
 router.post("/reset-password/:token", async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
-  const user = USERS.find((user: any) => user.email === req.body.email);
-  if (!user) return NOT_FOUND(res, "Email");
-
+  !password && NOT_FOUND(res, "Password");
 
   try {
+    const decodedToken = jwt.verify(token, config.KEY);
+    const user = USERS.find((user: any) => user.email === req.body.email);
+
     const passwordEncrypted = await bcrypt.hash(password, 10);
     user.password = passwordEncrypted;
     OK(res, {}, "Password reset success");
   } catch (err) {
-    ERROR(res, err?.message, 400);
+    ERROR(res, err?.message, err?.code);
   }
 });
 

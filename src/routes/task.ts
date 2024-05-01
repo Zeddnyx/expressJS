@@ -1,27 +1,29 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 
-import { PAGINATION, NOT_FOUND, OK, ERROR } from "../../utils/response";
-import validationColumn from "../../utils/validationColumn";
+import { PAGINATION, NOT_FOUND, OK, ERROR } from "../utils/response";
+import validationColumn from "../utils/validationColumn";
+import authenticate, { apiKey } from "../utils/middleware";
+import { ITask } from "../types";
 
 const router = Router();
-const OBJ = {
+const OBJ: ITask = {
   id: uuidv4(),
   task: "task",
   column: "backlog", // "backlog" | "todo" | "inProgress" | "completed";
   date: new Date().toLocaleDateString(),
 };
-const ARR = [OBJ];
+const ARR: ITask[] = [OBJ];
 
-router.get("/task", (req, res) => {
+router.get("/task", apiKey, (req, res) => {
   try {
-    OK(res, PAGINATION(req, ARR));
+    OK(res, PAGINATION(req, ARR, "task"));
   } catch (err) {
     ERROR(res, err?.message, 500);
   }
 });
 
-router.get("/task/:id", (req, res) => {
+router.get("/task/:id", apiKey, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id == id);
   try {
@@ -31,7 +33,7 @@ router.get("/task/:id", (req, res) => {
   }
 });
 
-router.post("/task", (req, res) => {
+router.post("/task", apiKey, authenticate, (req, res) => {
   const { column } = req.body;
 
   try {
@@ -48,7 +50,7 @@ router.post("/task", (req, res) => {
   }
 });
 
-router.put("/task/:id", (req, res) => {
+router.put("/task/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
   const { column } = req.body;
 
@@ -68,7 +70,7 @@ router.put("/task/:id", (req, res) => {
   }
 });
 
-router.delete("/task/:id", (req, res) => {
+router.delete("/task/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id == id);
   try {

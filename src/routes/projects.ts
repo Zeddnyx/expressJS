@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 
-import { NOT_FOUND, OK, ERROR, PAGINATION } from "../../utils/response";
-import authenticate from "../../utils/authenticate";
+import { NOT_FOUND, OK, ERROR, PAGINATION } from "../utils/response";
+import authenticate, { apiKey } from "../utils/middleware";
+import { IProject } from "../types";
 
 const router = Router();
-const ARR = [
+const ARR: IProject[] = [
   {
     id: uuidv4(),
     title: "zedd",
@@ -18,15 +19,15 @@ const ARR = [
   },
 ];
 
-router.get("/projects", (req, res) => {
+router.get("/projects", apiKey, (req, res) => {
   try {
-    OK(res, PAGINATION(req, ARR));
+    OK(res, PAGINATION(req, ARR, "title"));
   } catch (err) {
     ERROR(res, err?.message, 500);
   }
 });
 
-router.post("/projects", authenticate, (req, res) => {
+router.post("/projects", apiKey, authenticate, (req, res) => {
   const payload = {
     id: uuidv4(),
     ...req.body,
@@ -40,7 +41,7 @@ router.post("/projects", authenticate, (req, res) => {
   }
 });
 
-router.get("/projects/:id", (req, res) => {
+router.get("/projects/:id", apiKey, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   if (result) {
@@ -54,7 +55,7 @@ router.get("/projects/:id", (req, res) => {
   }
 });
 
-router.delete("/projects/:id", authenticate, (req, res) => {
+router.delete("/projects/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   if (result) {
@@ -68,7 +69,7 @@ router.delete("/projects/:id", authenticate, (req, res) => {
   }
 });
 
-router.put("/projects/:id", authenticate, (req, res) => {
+router.put("/projects/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
   const result = ARR.find((obj) => obj.id === id);
   if (result) {

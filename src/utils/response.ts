@@ -19,12 +19,26 @@ export const OK = (res: any, data: any, msg?: string, code?: number) =>
     data: data,
   });
 
-export const PAGINATION = (req: any, items: any[]) => {
-  const { limit = 10, page = 1 } = req.query as any;
+export const PAGINATION = (req: any, items: any[], searchKey?: string) => {
+  const { limit = 10, page = 1, search, category } = req.query as any;
+
+  let filteredItems = items;
+  if (search) {
+    filteredItems = items.filter(
+      (item: any) =>
+        item[searchKey]?.toLowerCase()?.includes(search.toLowerCase()),
+    );
+  }
+
+  if (category) {
+    filteredItems = filteredItems.filter(
+      (item: any) => item.category === category,
+    );
+  }
 
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-  const paginatedResults = items.slice(startIndex, endIndex);
+  const paginatedResults = filteredItems.slice(startIndex, endIndex);
 
   const total_item = items.length;
   const total_page = Math.ceil(total_item / limit);

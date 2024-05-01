@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import { config } from "../config";
+import { config } from "../../config";
 import { ERROR } from "./response";
 
 export default function authenticate(req: any, res: any, next: any) {
@@ -14,6 +14,16 @@ export default function authenticate(req: any, res: any, next: any) {
   });
 }
 
-export const generateToken = (user: any) => {
-  return jwt.sign({ ...user }, config.KEY, { expiresIn: "1d" });
+export const generateToken = (user: any, exp?: string) => {
+  return jwt.sign({ ...user }, config.KEY, { expiresIn: exp ? exp : "1d" });
+};
+
+export function apiKey(req: any, res: any, next: any) {
+  const apiKey = req.headers["api-key"];
+
+  if (!apiKey) {
+    return ERROR(res, "API key is required", 401);
+  }
+
+  next();
 }

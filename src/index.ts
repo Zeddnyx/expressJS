@@ -1,18 +1,17 @@
-import express from "express";
-import http from "http";
-import cookieParser from "cookie-parser";
-import compression from "compression";
 import cors from "cors";
+import http from "http";
+import express from "express";
 import passport from "passport";
 import flash from "express-flash";
+import compression from "compression";
 import session from "express-session";
-import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 import { exec } from "child_process";
 
-import projects from "./routes/projects";
 import blog from "./routes/blog";
 import task from "./routes/task";
 import auth from "./routes/auth";
+import projects from "./routes/projects";
 import { config } from "../config/";
 
 if (config.NODE_ENV !== "production") {
@@ -34,11 +33,11 @@ app.use(
     saveUninitialized: false,
   }),
 );
-app.use(passport.initialize());
-app.use(passport.session());
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json());
+app.use(passport.session());
+app.use(passport.initialize());
 app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
@@ -56,9 +55,9 @@ app.use((req, _, next) => {
   next();
 });
 
-app.use("/api", projects);
 app.use("/api", blog);
 app.use("/api", task);
+app.use("/api", projects);
 app.use("/api/auth", auth);
 
 server.listen(PORT, () => {
