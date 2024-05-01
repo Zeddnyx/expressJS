@@ -12,9 +12,11 @@ export interface IComment {
 export interface IBlog {
   id: string;
   title: string;
+  slug: string;
   content: string;
   date: string;
   category: string;
+  comments?: number;
 }
 
 export interface IProject {

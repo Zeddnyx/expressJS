@@ -5,22 +5,46 @@ import { IComment, IBlog } from "../types";
 import { NOT_FOUND, OK, ERROR, PAGINATION } from "../utils/response";
 import authenticate, { apiKey } from "../utils/middleware";
 import hideEmails from "../utils/hideEmails";
+import validationBlog from "../utils/validationBlog";
 
 const router = Router();
 const OBJ: IBlog = {
   id: uuidv4(),
   title: "zedd",
+  slug: "zedd",
   content:
     "Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit",
   date: new Date().toLocaleDateString(),
   category: "react",
+  comments: 0,
 };
 const ARR: IBlog[] = [OBJ];
 let comments: IComment[] = [];
 
 router.get("/blog", apiKey, (req, res) => {
   try {
-    OK(res, PAGINATION(req, ARR, "title"));
+    const sortBy = req.query.sortBy as string;
+    if (sortBy === "comments") {
+      OK(
+        res,
+        PAGINATION(
+          req,
+          ARR.sort((a, b) => b.comments - a.comments),
+          "title",
+        ),
+      );
+    } else {
+      OK(
+        res,
+        PAGINATION(
+          req,
+          ARR.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          ),
+          "title",
+        ),
+      );
+    }
   } catch (err) {
     ERROR(res, err?.message, 500);
   }
@@ -42,6 +66,8 @@ router.post("/blog", apiKey, authenticate, (req, res) => {
     ...req.body,
     date: new Date().toLocaleDateString(),
   };
+  validationBlog(payload, res);
+
   try {
     ARR.push(payload);
     OK(res, payload, "Succes add data");
@@ -58,6 +84,8 @@ router.put("/blog/:id", apiKey, authenticate, (req, res) => {
     if (result) {
       result.title = req.body.title;
       result.content = req.body.content;
+      result.category = req.body.category;
+      result.slug = req.body.slug;
       OK(res, result, "Succes update data");
     } else {
       NOT_FOUND(res, `Blog`);
@@ -100,6 +128,14 @@ router.post("/blog/comment/:id", apiKey, (req, res) => {
   };
 
   comments.push(newComment);
+  const articleCommentsCount = comments.filter(
+    (comment) => comment.articleId === id,
+  ).length;
+  ARR.forEach((blog) => {
+    if (blog.id === id) {
+      blog.comments = articleCommentsCount;
+    }
+  });
 
   try {
     OK(res, newComment, "Comment added successfully");
