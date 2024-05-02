@@ -18,8 +18,9 @@ const OBJ: IBlog = {
   category: "react",
   comments: 0,
 };
-const ARR: IBlog[] = [OBJ];
+let blog: IBlog[] = [OBJ];
 let comments: IComment[] = [];
+let emails: string[] = [];
 
 router.get("/blog", apiKey, (req, res) => {
   try {
@@ -29,7 +30,7 @@ router.get("/blog", apiKey, (req, res) => {
         res,
         PAGINATION(
           req,
-          ARR.sort((a, b) => b.comments - a.comments),
+          blog.sort((a, b) => b.comments - a.comments),
           "title",
         ),
       );
@@ -38,7 +39,7 @@ router.get("/blog", apiKey, (req, res) => {
         res,
         PAGINATION(
           req,
-          ARR.sort(
+          blog.sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           ),
           "title",
@@ -50,9 +51,9 @@ router.get("/blog", apiKey, (req, res) => {
   }
 });
 
-router.get("/blog/:id", apiKey, (req, res) => {
-  const { id } = req.params;
-  const result = ARR.find((obj) => obj.id === id);
+router.get("/blog/:slug", apiKey, (req, res) => {
+  const { slug } = req.params;
+  const result = blog.find((obj) => obj.slug === slug);
   try {
     result ? OK(res, result) : NOT_FOUND(res, `Blog`);
   } catch (err) {
@@ -69,7 +70,7 @@ router.post("/blog", apiKey, authenticate, (req, res) => {
   validationBlog(payload, res);
 
   try {
-    ARR.push(payload);
+    blog.push(payload);
     OK(res, payload, "Succes add data");
   } catch (err) {
     ERROR(res);
@@ -78,7 +79,7 @@ router.post("/blog", apiKey, authenticate, (req, res) => {
 
 router.put("/blog/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
-  const result = ARR.find((obj) => obj.id === id);
+  const result = blog.find((obj) => obj.id === id);
 
   try {
     if (result) {
@@ -98,10 +99,10 @@ router.put("/blog/:id", apiKey, authenticate, (req, res) => {
 
 router.delete("/blog/:id", apiKey, authenticate, (req, res) => {
   const { id } = req.params;
-  const result = ARR.find((obj) => obj.id === id);
+  const result = blog.find((obj) => obj.id === id);
   if (result) {
     try {
-      ARR.splice(ARR.indexOf(result), 1);
+      blog.splice(blog.indexOf(result), 1);
       OK(res, {}, "Succes delete data", 200);
     } catch (err) {
       ERROR(res, err?.message, err?.code);
@@ -131,7 +132,7 @@ router.post("/blog/comment/:id", apiKey, (req, res) => {
   const articleCommentsCount = comments.filter(
     (comment) => comment.articleId === id,
   ).length;
-  ARR.forEach((blog) => {
+  blog.forEach((blog) => {
     if (blog.id === id) {
       blog.comments = articleCommentsCount;
     }
@@ -201,6 +202,20 @@ router.post("/blog/reply-comment/:id", apiKey, (req, res) => {
     }
   } else {
     NOT_FOUND(res, "Parent comment not found");
+  }
+});
+
+// subcscribe
+router.post("/blog/subscribe", (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    ERROR(res, "Email is required", 400);
+  }
+  try {
+    OK(res, {}, "Thank you for subscribing");
+    emails.push(email);
+  } catch (err) {
+    ERROR(res, err?.message, err?.code);
   }
 });
 
